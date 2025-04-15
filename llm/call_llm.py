@@ -298,7 +298,7 @@ def spark_main(appid, api_key, api_secret, Spark_url,domain, question, temperatu
     ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
     return ''.join([output_queue.get() for _ in range(output_queue.qsize())])
 
-def parse_llm_api_key(model:str, env_file:dict()=None):
+def parse_llm_api_key(model:str, env_file:dict()=None): # type: ignore
     """
     通过 model 和 env_file 的来解析平台参数
     """   
