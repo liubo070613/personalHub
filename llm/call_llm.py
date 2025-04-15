@@ -28,7 +28,7 @@ from time import mktime
 from urllib.parse import urlencode
 from wsgiref.handlers import format_date_time
 import zhipuai
-from langchain.utils import get_from_dict_or_env
+from langchain_core.utils import get_from_dict_or_env
 
 import websocket  # 使用websocket_client
 
@@ -54,7 +54,7 @@ def get_completion(prompt :str, model :str, temperature=0.1,api_key=None, secret
         return get_completion_glm(prompt, model, temperature, api_key, max_tokens)
     else:
         return "不正确的模型"
-    
+
 def get_completion_gpt(prompt : str, model : str, temperature : float, api_key:str, max_tokens:int):
     # 封装 OpenAI 原生接口
     if api_key == None:
@@ -116,7 +116,7 @@ def get_completion_wenxin(prompt : str, model : str, temperature : float, api_ke
 def get_completion_spark(prompt : str, model : str, temperature : float, api_key:str, appid : str, api_secret : str, max_tokens : int):
     if api_key == None or appid == None and api_secret == None:
         api_key, appid, api_secret = parse_llm_api_key("spark")
-    
+
     # 配置 1.5 和 2 的不同环境
     if model == "Spark-1.5":
         domain = "general"  

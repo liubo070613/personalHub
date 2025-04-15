@@ -10,7 +10,7 @@
 @Desc    :   在 LangChain LLM 基础上封装的项目类，统一了 GPT、文心、讯飞、智谱多种 API 调用
 '''
 
-from langchain.llms.base import LLM
+from langchain_core.language_models import LLM
 from typing import Dict, Any, Mapping
 from pydantic import Field
 
@@ -40,7 +40,7 @@ class Self_LLM(LLM):
             }
         # print(type(self.model_kwargs))
         return {**normal_params}
-    
+
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
         """Get the identifying parameters."""

@@ -10,13 +10,13 @@
 @Desc    :   基于讯飞星火大模型自定义 LLM 类
 '''
 
-from langchain.llms.base import LLM
+from langchain_core.language_models import LLM
 from typing import Any, List, Mapping, Optional, Dict, Union, Tuple
 from pydantic import Field
 from llm.self_llm import Self_LLM
 import json
 import requests
-from langchain.callbacks.manager import CallbackManagerForLLMRun
+from langchain_core.callbacks import CallbackManagerForLLMRun
 import _thread as thread
 import base64
 import datetime
@@ -70,7 +70,7 @@ class Spark_LLM(Self_LLM):
             print(e)
             print("请求失败")
             return "请求失败"
-        
+
     @property
     def _llm_type(self) -> str:
         return "Spark"

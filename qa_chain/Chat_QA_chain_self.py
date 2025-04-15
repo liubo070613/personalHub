@@ -1,9 +1,9 @@
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 import sys
 sys.path.append('/Users/lta/Desktop/llm-universe/project')
 from qa_chain.model_to_llm import model_to_llm
@@ -44,13 +44,13 @@ class Chat_QA_chain_self:
 
 
         self.vectordb = get_vectordb(self.file_path, self.persist_path, self.embedding,self.embedding_key)
-        
-    
+
+
     def clear_history(self):
         "清空历史记录"
         return self.chat_history.clear()
 
-    
+
     def change_history_length(self,history_len:int=1):
         """
         保存指定对话轮次的历史记录
@@ -62,20 +62,20 @@ class Chat_QA_chain_self:
         n = len(self.chat_history)
         return self.chat_history[n-history_len:]
 
- 
+
     def answer(self, question:str=None,temperature = None, top_k = 4):
         """"
         核心方法，调用问答链
         arguments: 
         - question：用户提问
         """
-        
+
         if len(question) == 0:
             return "", self.chat_history
-        
+
         if len(question) == 0:
             return ""
-        
+
         if temperature == None:
             temperature = self.temperature
         llm = model_to_llm(self.model, temperature, self.appid, self.api_key, self.Spark_api_secret,self.Wenxin_secret_key)
@@ -89,7 +89,7 @@ class Chat_QA_chain_self:
             llm = llm,
             retriever = retriever
         )
-        
+
         #print(self.llm)
         result = qa({"question": question,"chat_history": self.chat_history})       #result里有question、chat_history、answer
         answer =  result['answer']
@@ -97,7 +97,7 @@ class Chat_QA_chain_self:
         self.chat_history.append((question,answer)) #更新历史记录
 
         return self.chat_history  #返回本次回答和更新后的历史记录
-        
+
 
 
 

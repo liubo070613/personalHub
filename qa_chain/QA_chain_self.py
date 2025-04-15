@@ -1,6 +1,6 @@
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 import sys
 sys.path.append("../")
 from qa_chain.model_to_llm import model_to_llm
@@ -60,7 +60,7 @@ class QA_chain_self():
 
     #基于大模型的问答 prompt 使用的默认提示模版
     #default_template_llm = """请回答下列问题:{question}"""
-           
+
     def answer(self, question:str=None, temperature = None, top_k = 4):
         """"
         核心方法，调用问答链
@@ -70,10 +70,10 @@ class QA_chain_self():
 
         if len(question) == 0:
             return ""
-        
+
         if temperature == None:
             temperature = self.temperature
-            
+
         if top_k == None:
             top_k = self.top_k
 
