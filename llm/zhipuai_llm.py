@@ -180,7 +180,7 @@ class ZhipuAILLM(Self_LLM):
 
         response = await self.client.async_invoke(**params)
 
-        return response_payload
+        return response
 
     def _stream(
         self,

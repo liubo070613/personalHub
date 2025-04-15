@@ -2,7 +2,8 @@ import sys
 sys.path.append("../llm")
 from llm.wenxin_llm import Wenxin_LLM
 from llm.spark_llm import Spark_LLM
-from llm.zhipuai_llm import ZhipuAILLM
+# from llm.zhipuai_llm import ZhipuAILLM
+from langchain_community.chat_models import ChatZhipuAI
 from langchain_openai import ChatOpenAI
 from llm.call_llm import parse_llm_api_key
 
@@ -26,10 +27,10 @@ def model_to_llm(model:str=None, temperature:float=0.0, appid:str=None, api_key:
             if api_key == None or appid == None and Spark_api_secret == None:
                 api_key, appid, Spark_api_secret = parse_llm_api_key("spark")
             llm = Spark_LLM(model=model, temperature = temperature, appid=appid, api_secret=Spark_api_secret, api_key=api_key)
-        elif model in ["chatglm_pro", "chatglm_std", "chatglm_lite"]:
+        elif model in ["chatglm_pro", "chatglm_std", "glm-4-long"]:
             if api_key == None:
                 api_key = parse_llm_api_key("zhipuai")
-            llm = ZhipuAILLM(model=model, zhipuai_api_key=api_key, temperature = temperature)
+            llm = ChatZhipuAI(model=model, zhipuai_api_key=api_key, temperature = temperature)
         else:
-            raise ValueError(f"model{model} not support!!!")
+            raise ValueError(f"model:{model} not support!!!")
         return llm

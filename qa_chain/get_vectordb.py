@@ -4,7 +4,7 @@ import sys
 
 from langchain_openai import OpenAIEmbeddings    # 调用 OpenAI 的 Embeddings 模型
 import os
-from embedding.zhipuai_embedding import ZhipuAIEmbeddings
+from langchain_community.embeddings import ZhipuAIEmbeddings
 from database.create_db import create_db,load_knowledge_db
 from embedding.call_embedding import get_embedding
 
