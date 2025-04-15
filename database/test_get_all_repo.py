@@ -2,18 +2,23 @@ import json
 import requests
 import os
 import base64
-import loguru
+import loguru #日志
 from dotenv import load_dotenv
 # 加载环境变量
 load_dotenv()
 # 从环境变量中获取TOKEN
-TOKEN = os.getenv('TOKEN')
+TOKEN = os.getenv('GITHUB_TOKEN')
 # 定义获取组织仓库的函数
 def get_repos(org_name, token, export_dir):
+    # 如果export_dir不存在，则创建
+    if not os.path.exists(export_dir):
+        os.makedirs(export_dir)
     headers = {
         'Authorization': f'token {token}',
     }
-    url = f'https://api.github.com/orgs/{org_name}/repos'
+    # 将组织API改为用户API
+    # url = f'https://api.github.com/orgs/{org_name}/repos'
+    url = f'https://api.github.com/users/{org_name}/repos'
     response = requests.get(url, headers=headers, params={'per_page': 200, 'page': 0})
     if response.status_code == 200:
         repos = response.json()
@@ -52,9 +57,9 @@ def fetch_repo_readme(org_name, repo_name, token, export_dir):
 # 主函数
 if __name__ == '__main__':
     # 配置组织名称
-    org_name = 'datawhalechina'
+    org_name = 'liubo070613'
     # 配置 export_dir
-    export_dir = "database/readme_db"  # 请替换为实际的目录路径
+    export_dir = "database/readme_db_liubo"  # 请替换为实际的目录路径
     # 获取仓库列表
     repos = get_repos(org_name, TOKEN, export_dir)
     # 打印仓库名称

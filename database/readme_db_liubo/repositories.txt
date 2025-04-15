@@ -1,0 +1,4 @@
+java-design-patterns
+mini-spring
+personalHub
+Spring-AI-MCP
