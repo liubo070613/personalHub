@@ -5,15 +5,19 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import tempfile
 from dotenv import load_dotenv, find_dotenv
 from embedding.call_embedding import get_embedding
-from langchain.document_loaders import UnstructuredFileLoader
-from langchain.document_loaders import UnstructuredMarkdownLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyMuPDFLoader
-from langchain.vectorstores import Chroma
-# 首先实现基本配置
+from langchain_unstructured import UnstructuredLoader
+# from langchain_community.document_loaders import UnstructuredFileLoader
+from langchain_community.document_loaders import UnstructuredMarkdownLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores.utils import filter_complex_metadata
 
+# 首先实现基本配置
 DEFAULT_DB_PATH = "./knowledge_db"
-DEFAULT_PERSIST_PATH = "./vector_db"
+DEFAULT_PERSIST_PATH = "./vector_db/chroma"
+
+os.makedirs(DEFAULT_PERSIST_PATH, exist_ok=True)
 
 
 def get_files(dir_path):
@@ -39,7 +43,7 @@ def file_loader(file, loaders):
         if not match:
             loaders.append(UnstructuredMarkdownLoader(file))
     elif file_type == 'txt':
-        loaders.append(UnstructuredFileLoader(file))
+        loaders.append(UnstructuredLoader(file))
     return
 
 
@@ -49,7 +53,7 @@ def create_db_info(files=DEFAULT_DB_PATH, embeddings="openai", persist_directory
     return ""
 
 
-def create_db(files=DEFAULT_DB_PATH, persist_directory=DEFAULT_PERSIST_PATH, embeddings="openai"):
+def create_db(files=DEFAULT_DB_PATH, persist_directory=DEFAULT_PERSIST_PATH, embeddings="zhipuai"):
     """
     该函数用于加载 PDF 文件，切分文档，生成文档的嵌入向量，创建向量数据库。
 
@@ -70,22 +74,24 @@ def create_db(files=DEFAULT_DB_PATH, persist_directory=DEFAULT_PERSIST_PATH, emb
     for loader in loaders:
         if loader is not None:
             docs.extend(loader.load())
-    # 切分文档
+    # 切分文档，设定分块大小和重叠大小
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=500, chunk_overlap=150)
     split_docs = text_splitter.split_documents(docs)
+    
+    # 过滤复杂元数据
+    split_docs = filter_complex_metadata(split_docs)
+    
     if type(embeddings) == str:
         embeddings = get_embedding(embedding=embeddings)
-    # 定义持久化路径
-    persist_directory = './vector_db/chroma'
     # 加载数据库
     vectordb = Chroma.from_documents(
     documents=split_docs,
     embedding=embeddings,
     persist_directory=persist_directory  # 允许我们将persist_directory目录保存到磁盘上
     ) 
-
-    vectordb.persist()
+    # 在最新版本的 Chroma 中，文档会自动持久化，不再需要手动调用 persist() 方法
+    # vectordb.persist()
     return vectordb
 
 

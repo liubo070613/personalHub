@@ -4,8 +4,9 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from langchain_community.embeddings import ZhipuAIEmbeddings
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain.embeddings.openai import OpenAIEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from llm.call_llm import parse_llm_api_key
 
 
