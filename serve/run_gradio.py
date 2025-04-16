@@ -14,6 +14,7 @@ from database.create_db import create_db_info
 from qa_chain.Chat_QA_chain_self import Chat_QA_chain_self
 from qa_chain.QA_chain_self import QA_chain_self
 import re
+from fastapi import FastAPI
 # 导入 dotenv 库的函数
 # dotenv 允许您从 .env 文件中读取环境变量
 # 这在开发时特别有用，可以避免将敏感信息（如API密钥）硬编码到代码中
@@ -25,23 +26,24 @@ LLM_MODEL_DICT = {
     "openai": ["gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0613", "gpt-4", "gpt-4-32k"],
     "wenxin": ["ERNIE-Bot", "ERNIE-Bot-4", "ERNIE-Bot-turbo"],
     "xinhuo": ["Spark-1.5", "Spark-2.0"],
-    "zhipuai": ["chatglm_pro", "chatglm_std", "chatglm_lite"]
+    "zhipuai": ["glm-4-long"]
 }
 
 
 LLM_MODEL_LIST = sum(list(LLM_MODEL_DICT.values()),[])
-INIT_LLM = "chatglm_std"
+INIT_LLM = "glm-4-long"
 EMBEDDING_MODEL_LIST = ['zhipuai', 'openai', 'm3e']
 INIT_EMBEDDING_MODEL = "m3e"
-DEFAULT_DB_PATH = "./knowledge_db"
-DEFAULT_PERSIST_PATH = "./vector_db/chroma"
-AIGC_AVATAR_PATH = "./figures/aigc_avatar.png"
-DATAWHALE_AVATAR_PATH = "./figures/datawhale_avatar.png"
-AIGC_LOGO_PATH = "./figures/aigc_logo.png"
-DATAWHALE_LOGO_PATH = "./figures/datawhale_logo.png"
+DEFAULT_DB_PATH = "../knowledge_db"
+DEFAULT_PERSIST_PATH = "../vector_db/chroma"
+AIGC_AVATAR_PATH = "../figures/aigc_avatar.png"
+DATAWHALE_AVATAR_PATH = "../figures/datawhale_avatar.png"
+AIGC_LOGO_PATH = "../figures/aigc_logo.png"
+DATAWHALE_LOGO_PATH = "../figures/datawhale_logo.png"
 
 def get_model_by_platform(platform):
     return LLM_MODEL_DICT.get(platform, "")
+
 class Model_center():
     """
     存储问答 Chain 的对象 
@@ -157,8 +159,8 @@ with block as demo:
         gr.Image(value=AIGC_LOGO_PATH, scale=1, min_width=10, show_label=False, show_download_button=False, container=False)
    
         with gr.Column(scale=2):
-            gr.Markdown("""<h1><center>动手学大模型应用开发</center></h1>
-                <center>LLM-UNIVERSE</center>
+            gr.Markdown("""<h1><center>基于知识库的问答系统</center></h1>
+                <center>Knowledge Base Assistant</center>
                 """)
         gr.Image(value=DATAWHALE_LOGO_PATH, scale=1, min_width=10, show_label=False, show_download_button=False, container=False)
 
@@ -168,11 +170,6 @@ with block as demo:
             # 创建一个文本框组件，用于输入 prompt。
             msg = gr.Textbox(label="Prompt/问题")
 
-            with gr.Row():
-                # 创建提交按钮。
-                db_with_his_btn = gr.Button("Chat db with history")
-                db_wo_his_btn = gr.Button("Chat db without history")
-                llm_btn = gr.Button("Chat with llm")
             with gr.Row():
                 # 创建一个清除按钮，用于清除聊天机器人组件的内容。
                 clear = gr.ClearButton(
@@ -221,21 +218,10 @@ with block as demo:
         # 设置初始化向量数据库按钮的点击事件。当点击时，调用 create_db_info 函数，并传入用户的文件和希望使用的 Embedding 模型。
         init_db.click(create_db_info,
                       inputs=[file, embeddings], outputs=[msg])
-
-        # 设置按钮的点击事件。当点击时，调用上面定义的 chat_qa_chain_self_answer 函数，并传入用户的消息和聊天历史记录，然后更新文本框和聊天机器人组件。
-        db_with_his_btn.click(model_center.chat_qa_chain_self_answer, inputs=[
-                              msg, chatbot,  llm, embeddings, temperature, top_k, history_len],
-                              outputs=[msg, chatbot])
-        # 设置按钮的点击事件。当点击时，调用上面定义的 qa_chain_self_answer 函数，并传入用户的消息和聊天历史记录，然后更新文本框和聊天机器人组件。
-        db_wo_his_btn.click(model_center.qa_chain_self_answer, inputs=[
-                            msg, chatbot, llm, embeddings, temperature, top_k], outputs=[msg, chatbot])
-        # 设置按钮的点击事件。当点击时，调用上面定义的 respond 函数，并传入用户的消息和聊天历史记录，然后更新文本框和聊天机器人组件。
-        llm_btn.click(respond, inputs=[
-                      msg, chatbot, llm, history_len, temperature], outputs=[msg, chatbot], show_progress="minimal")
-
         # 设置文本框的提交事件（即按下Enter键时）。功能与上面的 llm_btn 按钮点击事件相同。
-        msg.submit(respond, inputs=[
-                   msg, chatbot,  llm, history_len, temperature], outputs=[msg, chatbot], show_progress="hidden")
+        msg.submit(model_center.chat_qa_chain_self_answer, inputs=[
+                              msg, chatbot,  llm, embeddings, temperature, top_k, history_len],
+                              outputs=[msg, chatbot])       
         # 点击后清空后端存储的聊天记录
         clear.click(model_center.clear_history)
     gr.Markdown("""提醒：<br>
@@ -248,4 +234,9 @@ gr.close_all()
 # 启动新的 Gradio 应用，设置分享功能为 True，并使用环境变量 PORT1 指定服务器端口。
 # demo.launch(share=True, server_port=int(os.environ['PORT1']))
 # 直接启动
-demo.launch()
+# demo.launch()
+
+app = FastAPI()
+
+app=gr.mount_gradio_app(app, demo, path="/")
+
